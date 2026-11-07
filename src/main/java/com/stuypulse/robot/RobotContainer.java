@@ -10,13 +10,6 @@ import com.stuypulse.robot.commands.subsystems.DriveCommands;
 import com.stuypulse.robot.constants.DriverConstants;
 import com.stuypulse.robot.constants.FieldConstants;
 import com.stuypulse.robot.constants.GlobalSettings;
-import com.stuypulse.robot.subsystems.swerve.GyroIO;
-import com.stuypulse.robot.subsystems.swerve.GyroIOPigeon2;
-import com.stuypulse.robot.subsystems.swerve.ModuleIO;
-import com.stuypulse.robot.subsystems.swerve.ModuleIOSim;
-import com.stuypulse.robot.subsystems.swerve.ModuleIOTalonFX;
-import com.stuypulse.robot.subsystems.swerve.Swerve;
-import com.stuypulse.robot.subsystems.swerve.TunerConstants;
 import com.stuypulse.robot.subsystems.vision.Vision;
 import com.stuypulse.robot.subsystems.vision.VisionConstants;
 import com.stuypulse.robot.subsystems.vision.VisionConstants.Camera;
@@ -41,7 +34,6 @@ public class RobotContainer {
     // public final CommandGamepad operator = new CommandGamepad(GlobalPorts.Gamepad.OPERATOR);
 
     // Subsystems
-    private final Swerve swerve;
     private final Vision vision;
     // Autons
     private final LoggedNetworkChooser<Auton> autonChooser = new LoggedNetworkChooser<>("Auton");
@@ -52,13 +44,6 @@ public class RobotContainer {
         EnumMap<Camera, VisionIO> visionIOMap = new EnumMap<>(Camera.class);
         switch (GlobalSettings.CURRENT_MODE) {
             case REAL -> {
-                swerve =
-                        new Swerve(
-                                new GyroIOPigeon2(),
-                                new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                                new ModuleIOTalonFX(TunerConstants.FrontRight),
-                                new ModuleIOTalonFX(TunerConstants.BackLeft),
-                                new ModuleIOTalonFX(TunerConstants.BackRight));
                 for (Camera camera : VisionConstants.Camera.values()) {
                     visionIOMap.put(
                             camera,
@@ -72,13 +57,6 @@ public class RobotContainer {
             }
 
             case SIM -> {
-                swerve =
-                        new Swerve(
-                                new GyroIO() {},
-                                new ModuleIOSim(TunerConstants.FrontLeft),
-                                new ModuleIOSim(TunerConstants.FrontRight),
-                                new ModuleIOSim(TunerConstants.BackLeft),
-                                new ModuleIOSim(TunerConstants.BackRight));
                 for (Camera camera : Camera.values()) {
                     visionIOMap.put(
                             camera,
@@ -88,19 +66,11 @@ public class RobotContainer {
             }
 
             default -> {
-                swerve =
-                        new Swerve(
-                                new GyroIO() {},
-                                new ModuleIO() {},
-                                new ModuleIO() {},
-                                new ModuleIO() {},
-                                new ModuleIO() {});
                 for (Camera camera : Camera.values()) {
                     visionIOMap.put(camera, new VisionIO() {});
                 }
             }
         }
-        vision = new Vision(swerve.visionConsumer, visionIOMap);
 
         configureLogging();
         configureDefaultCommands();
