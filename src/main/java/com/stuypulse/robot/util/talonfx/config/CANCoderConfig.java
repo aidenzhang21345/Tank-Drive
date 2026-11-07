@@ -1,0 +1,53 @@
+/************************ PROJECT ZIXI ************************/
+/* Copyright (c) 2026 StuyPulse Robotics. All rights reserved.*/
+/* This work is licensed under the terms of the MIT license.  */
+/**************************************************************/
+package com.stuypulse.robot.util.talonfx.config;
+
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
+
+/** Wrapper class for configuring CANCoder encoders */
+public class CANCoderConfig {
+    private final CANcoderConfiguration configuration = new CANcoderConfiguration();
+    private final MagnetSensorConfigs magnetSensorConfigs = new MagnetSensorConfigs();
+
+    public void configure(CANcoder encoder) {
+        CANcoderConfiguration defaultConfig = new CANcoderConfiguration();
+        encoder.getConfigurator().apply(defaultConfig);
+
+        encoder.getConfigurator().apply(configuration);
+    }
+
+    public CANcoderConfiguration getConfiguration() {
+        return this.configuration;
+    }
+
+    // MAGNET SENSOR CONFIGS
+
+    public CANCoderConfig withSensorDirection(SensorDirectionValue sensorDirection) {
+        magnetSensorConfigs.withSensorDirection(sensorDirection);
+
+        configuration.withMagnetSensor(magnetSensorConfigs);
+
+        return this;
+    }
+
+    public CANCoderConfig withAbsoluteSensorDiscontinuityPoint(double discontinuityPoint) {
+        magnetSensorConfigs.withAbsoluteSensorDiscontinuityPoint(discontinuityPoint);
+
+        configuration.withMagnetSensor(magnetSensorConfigs);
+
+        return this;
+    }
+
+    public CANCoderConfig withMagnetOffset(double magnetOffset) {
+        magnetSensorConfigs.withMagnetOffset(magnetOffset);
+
+        configuration.withMagnetSensor(magnetSensorConfigs);
+
+        return this;
+    }
+}
