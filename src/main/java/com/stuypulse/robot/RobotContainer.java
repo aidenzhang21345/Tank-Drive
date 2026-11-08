@@ -6,6 +6,7 @@ package com.stuypulse.robot;
 
 import com.stuypulse.robot.commands.auton.Auton;
 import com.stuypulse.robot.commands.auton.AutonFactory;
+import com.stuypulse.robot.commands.subsystems.DriveCommands;
 import com.stuypulse.robot.constants.DriverConstants;
 import com.stuypulse.robot.constants.FieldConstants;
 import com.stuypulse.robot.constants.GlobalSettings;
@@ -98,7 +99,9 @@ public class RobotContainer {
     /*** DEFAULTS ***/
     /****************/
 
-    private void configureDefaultCommands() {}
+    private void configureDefaultCommands() {
+        drive.setDefaultCommand(DriveCommands.joystickDrive(drive, driver));
+    }
 
     /***************/
     /*** BUTTONS ***/
