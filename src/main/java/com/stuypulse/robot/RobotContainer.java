@@ -6,10 +6,13 @@ package com.stuypulse.robot;
 
 import com.stuypulse.robot.commands.auton.Auton;
 import com.stuypulse.robot.commands.auton.AutonFactory;
-import com.stuypulse.robot.commands.subsystems.DriveCommands;
 import com.stuypulse.robot.constants.DriverConstants;
 import com.stuypulse.robot.constants.FieldConstants;
 import com.stuypulse.robot.constants.GlobalSettings;
+import com.stuypulse.robot.subsystems.drive.Drive;
+import com.stuypulse.robot.subsystems.drive.DriveIO;
+import com.stuypulse.robot.subsystems.drive.DriveIOSparkMax;
+import com.stuypulse.robot.subsystems.drive.DriveIOSparkMaxSim;
 import com.stuypulse.robot.subsystems.vision.Vision;
 import com.stuypulse.robot.subsystems.vision.VisionConstants;
 import com.stuypulse.robot.subsystems.vision.VisionConstants.Camera;
@@ -20,7 +23,6 @@ import com.stuypulse.robot.subsystems.vision.VisionIOPhoton;
 import com.stuypulse.robot.subsystems.vision.VisionIOPhotonSim;
 
 import org.wpilib.command3.button.CommandGamepad;
-import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.tunable.Tunables;
 
 import java.util.EnumMap;
@@ -34,6 +36,7 @@ public class RobotContainer {
     // public final CommandGamepad operator = new CommandGamepad(GlobalPorts.Gamepad.OPERATOR);
 
     // Subsystems
+    private final Drive drive;
     private final Vision vision;
     // Autons
     private final LoggedNetworkChooser<Auton> autonChooser = new LoggedNetworkChooser<>("Auton");
@@ -44,6 +47,7 @@ public class RobotContainer {
         EnumMap<Camera, VisionIO> visionIOMap = new EnumMap<>(Camera.class);
         switch (GlobalSettings.CURRENT_MODE) {
             case REAL -> {
+                drive = new Drive(new DriveIOSparkMax());
                 for (Camera camera : VisionConstants.Camera.values()) {
                     visionIOMap.put(
                             camera,
@@ -51,26 +55,30 @@ public class RobotContainer {
                                     ? new VisionIOLimelight(
                                             camera.getName(),
                                             camera.getRobotToCamera(),
-                                            swerve::getRotation)
-                                    : new VisionIOPhoton(camera.getName(), camera.getRobotToCamera()));
+                                            drive::getRotation)
+                                    : new VisionIOPhoton(
+                                            camera.getName(), camera.getRobotToCamera()));
                 }
             }
 
             case SIM -> {
+                drive = new Drive(new DriveIOSparkMaxSim());
                 for (Camera camera : Camera.values()) {
                     visionIOMap.put(
                             camera,
                             new VisionIOPhotonSim(
-                                    camera.getName(), camera.getRobotToCamera(), swerve::getPose));
+                                    camera.getName(), camera.getRobotToCamera(), drive::getPose));
                 }
             }
 
             default -> {
+                drive = new Drive(new DriveIO() {});
                 for (Camera camera : Camera.values()) {
                     visionIOMap.put(camera, new VisionIO() {});
                 }
             }
         }
+        vision = new Vision(drive.getVisionConsumer(), visionIOMap);
 
         configureLogging();
         configureDefaultCommands();
@@ -90,17 +98,13 @@ public class RobotContainer {
     /*** DEFAULTS ***/
     /****************/
 
-    private void configureDefaultCommands() {
-        swerve.setDefaultCommand(DriveCommands.joystickDrive(swerve, driver));
-    }
+    private void configureDefaultCommands() {}
 
     /***************/
     /*** BUTTONS ***/
     /***************/
 
-    private void configureButtonBindings() {
-        driver.dpadUp().onTrue(DriveCommands.resetHeading(swerve, Rotation2d.ZERO));
-    }
+    private void configureButtonBindings() {}
 
     /**************/
     /*** AUTONS ***/
